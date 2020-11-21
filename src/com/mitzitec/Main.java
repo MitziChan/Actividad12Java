@@ -1,64 +1,70 @@
-package com.mitzitec;
+package main;
 
-import java.util.Scanner;
 import java.io.IOException;
+import java.util.Scanner;
 
 
-public class Main {  Scanner entrada = new Scanner(System.in);
-
-    int menu;
-    String caso1, caso2, caso3;
-    boolean continue_software = true; AddressBook m = new AddressBook();
-
+public class Main {
     public static void main(String[] args) throws IOException {
-        Main d1 = new Main(); d1.Menu();
+        Main p = new Main();
+        p.opcion();
     }
 
-    public void Menu() throws IOException{
+    Scanner sc = new Scanner(System.in);
+    int op;
+    boolean continue_software = true;
+    AddressBook contact = new AddressBook();
+
+    public void showMenu(){
+        System.out.println("¡Bienvenido a la agenda! ¿Qué desea hacer?:\n 1. Ver lista de contactos\n 2. Crear nuevo contacto\n 3. Eliminar contacto existente");
+    }
+
+    public void opcion() throws IOException {
 
         do{
-            System.out.println("");
-            System.out.println("¡Bienvenido a la agenda" + "\n ¿Qué desea hacer?:" + "\n 1. Ver lista de contactos" + "\n 2. Crear nuevo contacto" + "\n 3. Eliminar contacto existente");
-            System.out.println("");
-            System.out.print("Digite la opción: ");
-            menu = entrada.nextInt();
-            switch (menu){
+            showMenu();
+            System.out.print("Digite la opción que desea: ");
+            op = sc.nextInt();
+            switch (op){
                 case 1:
-                    System.out.println("Contactos: ");
-                    m.list();
+                    showContact();
                     break;
 
                 case 2:
-                    System.out.println("");
-                    System.out.println("Digite el número: ");
-                    caso1= entrada.next();
-                    System.out.println("");
-                    System.out.println("Digite el nombre: ");
-                    caso2= entrada.next();
-                    m.Create(caso1,caso2);
-                    m.load();
-                    m.save();
+                    addContact();
                     break;
 
                 case 3:
-                    System.out.println("");
-                    System.out.println("Digite el numero para eliminar: ");
-                    caso3=entrada.next();
-                    m.delete(caso3);
-                    m.save();
-                    m.load();
+                    removeContact();
                     break;
 
                 default:
-                    System.out.println("");
                     System.out.println("Opción no valida");
                     continue_software = false;
                     break;
-
             }
 
         }while (continue_software);
 
     }
+
+    private void showContact() throws IOException {
+        contact.list();
+    }
+
+    private void addContact() throws IOException {
+        System.out.print("¿Cuál es el nombre?: ");
+        var name_person = sc.next();
+        System.out.print("¿Cuál es el numero?: ");
+        var phone_person = sc.next();
+        contact.create(name_person,phone_person);
+    }
+
+    private void removeContact() throws IOException {
+        System.out.print("Digíte el numero para eliminar: ");
+        var remove_person = sc.next();
+        contact.delete(remove_person);
+    }
+
 
 }

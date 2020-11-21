@@ -1,67 +1,94 @@
-package com.mitzitec;
+package main;
 
-import java.util.Map;
-import java.io.IOException;
-import java.io.BufferedWriter;
-import java.nio.file.FileSystems;
+import java.util.HashMap;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.nio.file.Files;
-import java.util.List;
 import java.util.ArrayList;
+import java.nio.file.Files;
+import java.io.*;
+import java.nio.file.FileSystems;
 
 
 public class AddressBook {
-    HashMap<String, String> agenda = new HashMap<>();
-    public void Create(String numero, String nombre){
 
-        if(!agenda.containsKey(numero)){ agenda.put(numero, nombre);
-            System.out.println("Se agregó el contacto");
-        }
-        else{ System.out.println("Contacto ya existe");
-        }
-    }
-
-    public void list(){
-        if(agenda.entrySet().isEmpty()){
-            System.out.println("Lista vacía, no hay contactos aún");
-        }else{ for (Map.Entry<String, String> entry: agenda.entrySet()){
-            System.out.println("\nTelefono: "+entry.getKey()+"      Nombre: "+entry.getValue()); }
-        }
-    }
-
-    public void delete(String telefono){
-        if(agenda.containsKey(telefono)){ agenda.remove(telefono);
-        }
-
-    }
-
+    private HashMap<String,String> contacts = new HashMap<>();
+    private String archivo = "C:\\Users\\marco\\IdeaProjects\\MitziAgenda\\src\\main\\agenda.csv";
     public void load() throws IOException {
-        List fileLines = new ArrayList();
-
         String separator = FileSystems.getDefault().getSeparator();
-        String filename = String.format( "src%main%agenda.csv", separator, separator);
 
-        Path path = Paths.get(filename);
-        fileLines = Files.readAllLines(path, Charset.defaultCharset());
-        for (var li:fileLines) { var cont = li.toString().split(",");agenda.put(cont[0],cont[1]); }
+        String nombreDeArch = String.format("src%smain%sagenda.csv",separator,separator,separator,separator);
+        Path path = Paths.get(nombreDeArch);
+
+        ArrayList<String> lines = new ArrayList<>();
+
+        if(!Files.exists(path)){
+            File archivo = new File(String.valueOf(path));
+            archivo.createNewFile();
+        }
+
+        lines = (ArrayList<String>) Files.readAllLines(path);
+        for (var contact : lines){
+            var infoContact = contact.split(",");
+            contacts.put(infoContact[0].trim(),infoContact[1].trim());
+        }
     }
 
-    public void save(){
+    public void save() throws IOException {
         String separator = FileSystems.getDefault().getSeparator();
-        String filename = String.format(
-                "src%main%sagenda.csv",
-                separator, separator
-        );
-        Path path = Paths.get(filename);
+        String fileName = String.format("src%smain%sagenda.csv",separator,separator,separator,separator);
+        Path path = Paths.get(fileName);
 
-        try (BufferedWriter writer = Files.newBufferedWriter(path, Charset.defaultCharset())) {
-            String line = null;
-            for (var ag:agenda.entrySet()) { line = ag.getKey() + "," + ag.getValue();
-                writer.write(line + System.lineSeparator());
+        ArrayList<String> saveContacts = new ArrayList<>();
+        for (var contact : contacts.entrySet()){
+            saveContacts.add(contact.getKey()+", "+ contact.getValue());
+        }
+
+        Files.write(path,saveContacts);
+    }
+
+    public void list() throws IOException {
+        try{
+            load();
+            FileReader showContacts = new FileReader(archivo);
+            BufferedReader buffer = new BufferedReader(showContacts);
+            if (contacts.isEmpty()){
+                System.out.println("No hay contactos");
+            }else{
+                for(var contact : contacts.entrySet()){
+                    System.out.println(String.format("Contacto: %s %s",
+                            contact.getKey(),contact.getValue()));
+                }
             }
-        }catch(Exception e){ }
+            buffer.close();
+        } catch (FileNotFoundException e){
+            System.out.println("Archivo no existe");
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Error");
+        }
     }
+
+    public void create(String nombre, String telefono) throws IOException {
+        if (contacts.containsKey(telefono)){
+            System.out.println("Este contacto ya existe");
+        }else {
+            contacts.put(telefono.trim(),nombre.trim());
+            save();
+            load();
+            System.out.println("Contacto Creado");
+        }
+    }
+
+    public void delete(String telefono) throws IOException {
+        if (contacts.containsKey(telefono)){
+            System.out.println("Contacto inexistente");
+        }else{
+            var p = contacts.remove(telefono);
+            save();
+            load();
+            System.out.println("Contacto Eliminado");
+        }
+
+    }
+
 }
